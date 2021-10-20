@@ -1,0 +1,90 @@
+
+       Application properties
+
+server.port=3030
+
+spring.datasource.url=jdbc:mysql://localhost:3306/Bookcart
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+controller.java
+
+package com.Springboot.Jdbctemplate.jdbc;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+@RestController
+public class Controller {
+    @Autowired
+    Demo demo;
+    @GetMapping(value="/name")
+
+    public String Bookname()
+    {
+        return "Bookname";
+    }
+    @GetMapping(value="/Booknames")
+    public List<String> Booknames(){
+        return demo.Bookname();
+    }
+    @PostMapping(value="/login")
+    public String Login(@RequestBody Login login){
+        System.out.println(login.username);
+        System.out.println(login.password);
+        return "login is done";
+    }
+}
+-----------------------------
+
+
+login.java
+
+package com.Springboot.Jdbctemplate.jdbc;
+
+public class Login {
+  String username;
+  String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+------------------------------------------------------
+demo.java
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+@Repository
+public class Demo {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+    public List<String>Bookname()
+    {
+        List<String> names=new ArrayList<>();
+        names.addAll(jdbcTemplate.queryForList("select name from Bookcart",String.class));
+        return names;
+    }
+}
