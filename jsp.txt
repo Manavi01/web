@@ -1,0 +1,144 @@
+confie
+
+package com.SpringCar.demo.Configure;
+
+import com.SpringCar.demo.Service.MyService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class Myconfie {
+    @Bean
+    public MyService myService(){
+        return new MyService();
+    }
+}
+ controller
+
+package com.SpringCar.demo.Controller;
+
+import com.SpringCar.demo.Service.MyService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+@RestController
+public class MyController {
+    @Autowired
+    MyService myService;
+    @GetMapping("Cars")
+    public List<Cars>Cars(){
+        return myService.getCars();
+    }
+    @PostMapping("addCars")
+    public Cars addCars(@RequestBody Cars Cars){
+        return myService.addCars(Cars);
+    }
+}
+
+
+cars
+
+package com.SpringCar.demo.Controller;
+
+public class Cars {
+    int num;
+    String name;
+    String model;
+
+    public Cars(int num,String name,String model){
+        this.num=num;
+        this.name=name;
+        this.model=model;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+}
+Service
+package com.SpringCar.demo.Service;
+
+import com.SpringCar.demo.Controller.Cars;
+import java.util.ArrayList;
+import java.util.*;
+
+public class MyService implements MyServiceInterface{
+
+    List<Cars>list=new ArrayList<Cars>();
+    public MyService()
+    {
+        list.add(new Cars(1,"swift","v1"));
+        list.add(new Cars(2,"ford","v2"));
+    }
+
+    @Override
+    public List<Cars> getCars(){
+    return list;
+}
+   @Override
+   public Cars getnums(int num){
+    for(Cars Cars : this.list)
+    {
+        if(Cars.getNum() == num)
+        {
+            return Cars;
+        }
+    }
+    return null;
+   }
+    @Override
+    public Cars addCars(Cars Cars){
+        this.list.add(Cars);
+        return Cars;
+    }
+}
+
+demo
+package com.SpringCar.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DemoApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
+
+}
+service interface
+package com.SpringCar.demo.Service;
+import com.SpringCar.demo.Controller.Cars;
+
+import java.util.List;
+public interface MyServiceInterface {
+    public List<Cars>getCars();
+    public Cars addCars(Cars Cars);
+    public Cars getnums(int num);
+
+
+}
