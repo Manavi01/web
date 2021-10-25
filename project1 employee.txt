@@ -1,0 +1,158 @@
+Emplyoee.java
+package com.Project1.springbootbackend.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name="employees")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(name="first_name")
+    private String firstname;
+    @Column(name="last_name")
+    private String lastname;
+    @Column(name="email_id")
+    private String emailId;
+}
+
+
+EmployeeRepository.java
+package com.Project1.springbootbackend.repository;
+
+import com.Project1.springbootbackend.model.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+}
+
+
+ResourceNotfoundException.java
+package com.Project1.springbootbackend.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class ResourceNotFoundException extends RuntimeException{
+
+    public ResourceNotFoundException(String message){
+        super(message);
+    }
+}
+
+
+EmplyeeController.java
+package com.Project1.springbootbackend.controller;
+
+import com.Project1.springbootbackend.exception.ResourceNotFoundException;
+import com.Project1.springbootbackend.model.Employee;
+import com.Project1.springbootbackend.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @GetMapping
+    public List<Employee> getAllEmployee(){
+        return employeeRepository.findAll();
+    }
+    //build create employee REST API
+    @PostMapping
+    public Employee createEmployee(@RequestBody Employee employee){
+        return employeeRepository.save(employee);
+    }
+    //build get employee by id REST API
+    @GetMapping("{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable long id){
+      Employee employee = employeeRepository.findById(id)
+              .orElseThrow(() -> new ResourceNotFoundException("Employee not exist with id:" +id));
+      return ResponseEntity.ok(employee);
+    }
+    //build update employee REST API
+    @PutMapping("{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employeeDetails){
+        Employee updateEmployee =employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not exist with id:" +id));
+        updateEmployee.setFirstname(employeeDetails.getFirstname());
+        updateEmployee.setLastname(employeeDetails.getLastname());
+        updateEmployee.setEmailId(employeeDetails.getEmailId());
+
+        employeeRepository.save(updateEmployee);
+        return ResponseEntity.ok(updateEmployee);
+    }
+    //build delete employee REST API
+    @DeleteMapping("{id}")
+    public ResponseEntity<HttpStatus>deleteEmployee(@PathVariable long id){
+       Employee employee=employeeRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Employee not exist with id:" +id));
+        employeeRepository.delete(employee);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}
+
+application properties
+Spring.datasource.url=jdbc:mysql://localhost:3306/employee?useSSL=false
+Spring.datasource.username=root
+Spring.datasource.password=root
+
+Spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+
+Spring.jpa.hibernate.ddl-auto = update
+
+
+springbootbackendapplication.java
+package com.Project1.springbootbackend;
+
+import com.Project1.springbootbackend.model.Employee;
+import com.Project1.springbootbackend.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringbootBackendApplication implements CommandLineRunner {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootBackendApplication.class, args);
+	}
+
+	@Autowired
+	private EmployeeRepository employeeRepository;
+	@Override
+	public void run(String... args) throws Exception {
+		Employee employee=new Employee();
+		employee.setFirstname("Manavi");
+		employee.setLastname("J M");
+		employee.setEmailId("manavi@gmail.com");
+		employeeRepository.save(employee);
+
+		Employee employee1=new Employee();
+		employee1.setFirstname("kavya");
+		employee1.setLastname("P");
+		employee1.setEmailId("kavya@gmail.com");
+		employeeRepository.save(employee1);
+
+	}
+}
