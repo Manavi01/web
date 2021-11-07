@@ -1,0 +1,153 @@
+//Cart class
+    public static void addbooktocart() throws SQLException {
+
+        int copies = 0;
+        System.out.println("enter userid");
+        int userid = sc.nextInt();
+        System.out.println("enter bookname which u wanted to add to cart");
+        String bookname = sc.next();
+        System.out.println("Enter no. of copies to be added to cart");
+        int addCopies = sc.nextInt();
+        String sql90 = "select copies from BookStoreTable where bookname='" + bookname + "'";
+        ResultSet res_copies = stm.executeQuery(sql90);
+        while (res_copies.next()) {
+            copies = res_copies.getInt(1);
+        }
+        if (copies>= addCopies) {
+            String sql41 = "insert into cartTable values(" + userid + ",'" + bookname + "'," + addCopies + ")";
+            int status = stm.executeUpdate(sql41);
+            copies=copies-addCopies;
+            if (status == 0) {
+                System.out.println("PLEASE ENTER DIFFERNET OOK NAME");
+            }
+            else {
+                System.out.println("YOUR CART IS UPDATED");
+            }
+            if (status > 0) {
+                if (copies > 0) {
+                    String decrement_copies = "update BookStoreTable set copies=" + copies + " where bookname='" + bookname + "'";
+                    stm.executeUpdate(decrement_copies);
+                } else {
+                    String sql42 = "delete from book where bookname='" + bookname + "'";
+                    stm.executeUpdate(sql42);
+                }
+            }
+        }
+        else {
+            System.out.println("BOOK IS NOT PRESENT IN THE TABLE");
+        }
+
+
+    }
+    public static void displaybookfromcart() throws SQLException
+    {
+        System.out.println("PLEASE ENTER USER ID TO RETRIVE THE DATA");
+        int userid=sc.nextInt();
+        String sql43="select * from cartTable where userid="+userid+"";
+        ResultSet res=stm.executeQuery(sql43);
+        System.out.println("data is displayed");
+        while (res.next())
+        {
+            System.out.println(" userid: "+res.getInt(1)+"bookname: "+res.getString(2)+"copies: "+res.getInt(3));
+        }
+
+    }
+    public static void deletebookfromcart() throws SQLException
+    {
+        int copies=0;
+        int  bookCopies=0;
+        System.out.println("PLEASE ENTER USER ID");
+        int userid=sc.nextInt();
+        System.out.println("PLEASE ENTER BOOK NAME WHICH YOU WISH TO Delete");
+        String bookname=sc.next();
+        String sql433="select copies from cartTable where userid="+userid+" and bookname='"+bookname+"'";
+        ResultSet res=stm.executeQuery(sql433);
+        while (res.next()){
+            copies=copies+res.getInt(1);
+        }
+        String sql43="delete from cartTable where userid="+userid+" and bookname='"+bookname+"'";
+        int status=stm.executeUpdate(sql43);
+        if(status>0){
+            System.out.println("Deletion done in cart");
+            String checkCopiesInBook="select copies from BookStoreTable where bookname='"+bookname+"'";
+            ResultSet resCheck=stm.executeQuery(checkCopiesInBook);
+            while (resCheck.next()){
+                bookCopies=resCheck.getInt(1);
+            }
+            bookCopies=bookCopies+copies;
+
+            String sql44="update BookStoreTable set copies="+bookCopies+" where bookName='"+bookname+"'";
+            stm.executeUpdate(sql44);
+        }
+        else {
+            System.out.println("Book not present in cart");
+        }
+    }
+    public static int checkuserinlist() throws SQLException
+    {
+        int count=0;
+        System.out.println("PLEASE ENTER USER ID TO CONFIRM THE USER :");
+        int userid=sc.nextInt();
+        String sql51="select username from UserTable where userid="+userid+"";
+        ResultSet res=stm.executeQuery(sql51);
+        while (res.next()){
+            count++;
+        }
+        if(count>=1){
+            System.out.println("THANK YOU USER IS VALIDATED");
+        }
+        return count;
+    }
+
+    public static void main(String args[]) throws SQLException {
+        try {
+            String addr = "jdbc:mysql://localhost:3306/BookStore";
+            String username = "root";
+            String password = "root";
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(addr, username, password);
+            System.out.println("connection is established");
+            stm = con.createStatement();
+            Optionsclass o=new Optionsclass();
+            o.option();
+        } catch (ClassNotFoundException exe) {
+            System.out.println(exe);
+        } catch (SQLException exe) {
+            System.out.println(exe);
+        }
+    }
+
+}
+------------
+
+public static void cartOperation() throws SQLException
+    {
+        while (true) {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("enter the options");
+            System.out.println("1.addbooktocart 2.Deletebookfromcart 3.displaybookfromcart 4.checkuserinlist 5.exit");
+            int l = sc.nextInt();
+            switch (l) {
+                case 1:
+                    Main.addbooktocart();
+                    break;
+                case 2:
+                    Main.deletebookfromcart();
+                    break;
+                case 3:
+                    Main.displaybookfromcart();
+                    break;
+                case 4:
+                    Main.checkuserinlist();
+                    break;
+                case 5:
+                    option();
+
+            }
+        }
+    }
+
+-------------------------------------------------------------------------
+
+
+
